@@ -69,6 +69,7 @@ void loop() {
   client.println("");
   client.println("<html>");
   client.println("<head>");
+  client.println("<meta charset= 'UTF-8'");
   client.println("<title>Valor Analógico</title>");
   client.println("<meta http-equiv='refresh' content='5'>"); // Actualizar cada 5 segundos
   client.println("</head>");
