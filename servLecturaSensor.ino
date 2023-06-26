@@ -34,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-  WiFiClient client = server.available();
+  WiFiClient client = server.available(); // Acepta nuevas conexiones de clientes
   
   if (!client) {
     return;
@@ -42,26 +42,26 @@ void loop() {
   
   Serial.println("Nuevo cliente");
   
-  while (!client.available()) {
+  while (!client.available()) { // Espera hasta que el cliente envíe datos
     delay(1);
   }
   
-  String peticion = client.readStringUntil('\r');
+  String peticion = client.readStringUntil('\r'); // Lee la petición del cliente hasta el carácter '\r'
   Serial.println(peticion);
   client.flush();
   
-  if (peticion.indexOf('/LED=EN') != -1) {
-    estado = LOW;
-  }
-  
-  if (peticion.indexOf('/LED=APA') != -1) {
-    estado = HIGH;
-  }
-  
-  digitalWrite(PinLED, estado);
-  
   // Leer valor analógico
   int valorAnalogico = analogRead(PinAnalogico);
+
+  if (valorAnalogico >= 800) { // Si la petición contiene '/LED=EN'
+    estado = LOW; // Establece el estado del LED como apagado
+  }
+  
+  if (valorAnalogico <= 800) { // Si la petición contiene '/LED=APA'
+    estado = HIGH; // Establece el estado del LED como encendido
+  }
+  
+  digitalWrite(PinLED, estado); // Controla el LED según el estado
   
   // Generar y enviar la respuesta HTTP al cliente
   client.println("HTTP/1.1 200 OK");
@@ -75,10 +75,12 @@ void loop() {
   client.println("<body>");
   client.println("<h1>Valor Analógico:</h1>");
   client.println("<h2>" + String(valorAnalogico) + "</h2>");
+  client.println("<h2>Estado del LED:</h2>");
+  client.println("<input type='text' id='ledStatus' value='" + String(estado == HIGH ? "Encendido" : "Apagado") + "' readonly>");
   client.println("</body>");
   client.println("</html>");
   
   delay(1);
-  Serial.println("Peticion finalizada");
+  Serial.println("Petición finalizada");
   Serial.println("");
 }
